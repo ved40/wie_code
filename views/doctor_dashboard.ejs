@@ -23,6 +23,7 @@
         <a onclick="showSection('appointments')"><i class="bi bi-calendar2-check"></i> My Appointments</a>
         <a onclick="showSection('patients')"><i class="bi bi-people"></i> Patient List</a>
         <a onclick="showSection('prescriptions')"><i class="bi bi-file-medical"></i> Prescriptions</a>
+        <a onclick="showSection('profile')"><i class="bi bi-person-circle"></i> My Profile</a>
 
         <a href="/" class="logout"><i class="bi bi-box-arrow-left"></i> Logout</a>
     </div>
@@ -41,7 +42,9 @@
                     <div class="card shadow p-4 text-center">
                         <i class="bi bi-calendar2-check fs-1 text-primary"></i>
                         <h4 class="mt-3">Today's Appointments</h4>
-                        <p class="fs-4 fw-bold text-success">12</p>
+                        <p class="fs-4 fw-bold text-success">
+                            <%=appointmentcount%>
+                        </p>
                     </div>
                 </div>
 
@@ -49,17 +52,12 @@
                     <div class="card shadow p-4 text-center">
                         <i class="bi bi-people fs-1 text-warning"></i>
                         <h4 class="mt-3">Total Patients</h4>
-                        <p class="fs-4 fw-bold text-success">48</p>
+                        <p class="fs-4 fw-bold text-success">
+                            <%= patientcount%>
+                        </p>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="card shadow p-4 text-center">
-                        <i class="bi bi-file-earmark-medical fs-1 text-danger"></i>
-                        <h4 class="mt-3">Pending Reports</h4>
-                        <p class="fs-4 fw-bold text-success">7</p>
-                    </div>
-                </div>
 
             </div>
         </div>
@@ -142,9 +140,123 @@
         <!-- Prescription Section -->
         <div id="prescriptions" class="d-none">
             <h2><i class="bi bi-file-medical"></i> Prescriptions</h2>
-            <p>Manage or create digital prescriptions for patients.</p>
+            <p>Upload and manage digital prescriptions for patients.</p>
 
-            <button class="btn btn-primary my-3"><i class="bi bi-plus-lg"></i> Create New Prescription</button>
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card shadow p-4">
+                        <h5>Upload New Prescription</h5>
+                        <p class="text-muted small">Upload prescription (PDF or Image - Max 10MB)</p>
+
+                        <form id="prescriptionForm" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Patient Email</label>
+                                    <input type="email" class="form-control" id="patientEmail" name="patientEmail"
+                                        required placeholder="patient@example.com">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Patient Name</label>
+                                    <input type="text" class="form-control" id="patientName" name="patientName" required
+                                        placeholder="Patient full name">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Doctor Email</label>
+                                    <input type="email" class="form-control" id="doctorEmail" name="doctorEmail"
+                                        value="<%= doctor ? doctor.email : '' %>" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Doctor Name</label>
+                                    <input type="text" class="form-control" id="doctorName" name="doctorName"
+                                        value="<%= doctor ? doctor.name : '' %>" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Prescription File</label>
+                                <input type="file" class="form-control" id="prescriptionFile" name="prescriptionFile"
+                                    accept=".pdf,.jpg,.jpeg,.png,.gif" required>
+                                <small class="text-muted">Accepted formats: PDF, JPG, PNG, GIF</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Medicines/Instructions</label>
+                                <textarea class="form-control" id="medicines" name="medicines" rows="3"
+                                    placeholder="Enter medicine details, dosage, and instructions" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Expiry Date (Optional)</label>
+                                <input type="date" class="form-control" id="expiryDate" name="expiryDate">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-cloud-upload"></i> Upload Prescription
+                            </button>
+                        </form>
+
+                        <div id="prescriptionStatus" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow p-4">
+                        <h5>Recent Prescriptions</h5>
+                        <div id="prescriptionList" class="mt-3">
+                            <p class="text-muted">No prescriptions uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile" class="d-none">
+            <h2><i class="bi bi-person-circle"></i> My Profile</h2>
+
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card shadow p-4 text-center">
+                        <% if(doctor && doctor.profileImage) { %>
+                            <img src="<%= doctor.profileImage %>" alt="Profile"
+                                style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin: 0 auto;">
+                            <% } else { %>
+                                <i class="bi bi-person-circle" style="font-size: 120px; color: #999;"></i>
+                                <% } %>
+                                    <h4 class="mt-3">
+                                        <%= doctor ? doctor.name : 'Doctor' %>
+                                    </h4>
+                                    <p class="text-muted">
+                                        <%= doctor ? doctor.specialization : 'General' %>
+                                    </p>
+                                    <p class="text-muted">
+                                        <%= doctor ? doctor.email : 'N/A' %>
+                                    </p>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card shadow p-4">
+                        <h5>Upload Profile Image</h5>
+                        <p class="text-muted small">Upload a profile picture (JPG, PNG, GIF, WebP - Max 5MB)</p>
+
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <input type="file" class="form-control" id="profileImage" name="profileImage"
+                                    accept="image/*" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-cloud-upload"></i> Upload Image
+                            </button>
+                        </form>
+
+                        <div id="uploadStatus" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -155,6 +267,67 @@
             document.querySelectorAll(".content > div").forEach(sec => sec.classList.add("d-none"));
             document.getElementById(sectionId).classList.remove("d-none");
         }
+
+        // Handle profile image upload
+        document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById("profileImage");
+            const formData = new FormData();
+            formData.append("profileImage", fileInput.files[0]);
+
+            const doctorEmail = "<%= doctor ? doctor.email : '' %>";
+
+            try {
+                const response = await fetch(`/upload_doctor_image/${doctorEmail}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const message = await response.text();
+                const statusDiv = document.getElementById("uploadStatus");
+
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> ' + message + ' Refreshing...</div>';
+                    fileInput.value = '';
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> ' + message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById("uploadStatus").innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> Error: ' + error.message + '</div>';
+            }
+        });
+
+        // Handle prescription upload
+        document.getElementById("prescriptionForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(document.getElementById("prescriptionForm"));
+
+            try {
+                const response = await fetch("/upload_prescription", {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const message = await response.text();
+                const statusDiv = document.getElementById("prescriptionStatus");
+
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="alert alert-success"><i class="bi bi-check-circle"></i> ' + message + '</div>';
+                    document.getElementById("prescriptionForm").reset();
+                    // Clear the form after 2 seconds
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '';
+                    }, 3000);
+                } else {
+                    statusDiv.innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> ' + message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById("prescriptionStatus").innerHTML = '<div class="alert alert-danger"><i class="bi bi-exclamation-circle"></i> Error: ' + error.message + '</div>';
+            }
+        });
     </script>
 
 </body>

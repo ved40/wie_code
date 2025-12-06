@@ -9,10 +9,13 @@
 <body class="bg-light">
 
     <div class="container mt-5">
-        <h1 class="mb-4 fw-bold">Admin Dashboard</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="fw-bold">Admin Dashboard</h1>
+            <a href="/" class="btn btn-danger">Logout</a>
+        </div>
 
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card text-bg-primary shadow">
                     <div class="card-body">
                         <h4>Total Registered Patients
@@ -25,12 +28,23 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card text-bg-success shadow">
                     <div class="card-body">
                         <h4>Total Doctors</h4>
                         <h2>
+                            <%= doctorcount %>
+                        </h2>
+                    </div>
+                </div>
+            </div>
 
+            <div class="col-md-4">
+                <div class="card text-bg-info shadow">
+                    <div class="card-body">
+                        <h4>Total Receptionists</h4>
+                        <h2>
+                            <%= recepcount %>
                         </h2>
                     </div>
                 </div>
@@ -64,8 +78,118 @@
                     <% }%>
             </tbody>
         </table>
+
+        <h3 class="mt-5">All Doctors</h3>
+        <div class="mb-3">
+            <a href="/add_doctor" class="btn btn-success">+ Add New Doctor</a>
+        </div>
+        <table class="table table-bordered table-hover mt-2">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(doctors && doctors.length> 0) { %>
+                    <% for(doctor of doctors){ %>
+                        <tr>
+                            <td>
+                                <%= doctor.name %>
+                            </td>
+                            <td>
+                                <%= doctor.email %>
+                            </td>
+                            <td>
+                                <%= doctor.specialization %>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="deleteDoctor('<%= doctor._id %>')">Delete</button>
+                            </td>
+                        </tr>
+                        <% } %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No doctors added yet</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+
+        <h3 class="mt-5">All Receptionists</h3>
+        <div class="mb-3">
+            <a href="/add_receptionist" class="btn btn-info">+ Add New Receptionist</a>
+        </div>
+        <table class="table table-bordered table-hover mt-2">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(receptionists && receptionists.length> 0) { %>
+                    <% for(receptionist of receptionists){ %>
+                        <tr>
+                            <td>
+                                <%= receptionist.name %>
+                            </td>
+                            <td>
+                                <%= receptionist.email %>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger btn-sm"
+                                    onclick="deleteReceptionist('<%= receptionist._id %>')">Delete</button>
+                            </td>
+                        </tr>
+                        <% } %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No receptionists added yet</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
     </div>
 
 </body>
+
+<script>
+    function deleteDoctor(doctorId) {
+        if (confirm("Are you sure you want to delete this doctor?")) {
+            fetch(`/delete_doctor/${doctorId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                })
+                .catch(error => {
+                    alert("Error: " + error);
+                });
+        }
+    }
+
+    function deleteReceptionist(recepId) {
+        if (confirm("Are you sure you want to delete this receptionist?")) {
+            fetch(`/delete_receptionist/${recepId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert(data);
+                    location.reload();
+                })
+                .catch(error => {
+                    alert("Error: " + error);
+                });
+        }
+    }
+</script>
 
 </html>

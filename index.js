@@ -3,11 +3,45 @@ const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
+const multer = require("multer");
+const nodemailer = require("nodemailer");
 const recep = require("./models/receptionist");
 const doc = require("./models/doctor")
 const patient = require("./models/patient_rgstr");
 const appointment = require("./models/appointment");
 const admin = require("./models/admin_login");
+const prescription = require("./models/prescription");
+
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: "yourEmail@gmail.com",
+        pass: "your-app-password"
+    }
+});
+
+
+
+// Function to send registration confirmation email
+async function sendRegistrationEmail(patientName, patientEmail) {
+    try {
+        const mailOptions = {
+            from: "yourEmail@gmail.com",
+            to: patientEmail,
+            subject: "Registration Successful ✔",
+            html: `<h2>Hello ${patientName},</h2>
+                   <p>Your registration has been successfully completed.</p>
+                   <p>Thank you for choosing our hospital.</p>`
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log("Email sent to:", patientEmail);
+
+    } catch (err) {
+        console.log("Mail error:", err);
+    }
+}
 
 
 app.use(methodOverride("_method"));
@@ -29,6 +63,54 @@ app.set("views", path.join(__dirname, "/views"));
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, "public/uploads/doctors"));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    fileFilter: (req, file, cb) => {
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    },
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// Multer configuration for prescription uploads
+const prescriptionStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, "public/uploads/prescriptions"));
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const prescriptionUpload = multer({
+    storage: prescriptionStorage,
+    fileFilter: (req, file, cb) => {
+        const allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif'];
+        if (allowedMimes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF and image files are allowed'), false);
+        }
+    },
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+});
 
 app.get("/", (req, res) => {
     res.render("home.ejs")
@@ -58,7 +140,9 @@ app.post("/register_patient", async (req, res) => {
     let newPatient = new patient(patientData);
 
     await newPatient.save()
-        .then(() => {
+        .then(async () => {
+            // Send confirmation email
+            await sendRegistrationEmail(req.body.name, req.body.email);
             res.render("patient_rgstr_success.ejs", { patientName: req.body.name });
         })
         .catch((err) => {
@@ -86,14 +170,74 @@ app.get("/doctor_login", (req, res) => {
 
 app.post("/doctor_login", async (req, res) => {
     let appointments = await appointment.find();
+    let appointmentcount = await appointment.countDocuments({});
     let doc_data = await doc.find();
     let docData = doc_data[0];
     let formData = req.body;
     let patients = await patient.find();
+    let patientcount = await patient.countDocuments({})
     if ((docData.email == formData.email) && (docData.password == formData.password)) {
-        res.render("doctor_dashboard.ejs", { appointments, patients });
+        res.render("doctor_dashboard.ejs", { appointments, patients, patientcount, appointmentcount, doctor: docData });
     } else {
         res.send("wrong credentials");
+    }
+})
+
+app.post("/upload_doctor_image/:email", upload.single("profileImage"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.send("No file uploaded");
+        }
+
+        const doctorEmail = req.params.email;
+        const imagePath = "/uploads/doctors/" + req.file.filename;
+
+        // Update doctor with image path
+        await doc.findOneAndUpdate(
+            { email: doctorEmail },
+            { profileImage: imagePath },
+            { new: true }
+        );
+
+        res.send("Image uploaded successfully!");
+    } catch (err) {
+        res.send("Error uploading image: " + err.message);
+    }
+})
+
+app.post("/upload_prescription", prescriptionUpload.single("prescriptionFile"), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.send("No file uploaded");
+        }
+
+        const { patientEmail, patientName, doctorEmail, doctorName, medicines, expiryDate } = req.body;
+        const prescriptionPath = "/uploads/prescriptions/" + req.file.filename;
+
+        const newPrescription = new prescription({
+            patientEmail,
+            patientName,
+            doctorEmail,
+            doctorName,
+            prescriptionFile: prescriptionPath,
+            medicines,
+            expiryDate: expiryDate || null
+        });
+
+        await newPrescription.save();
+        res.send("Prescription uploaded successfully!");
+    } catch (err) {
+        res.send("Error uploading prescription: " + err.message);
+    }
+})
+
+app.get("/get_prescriptions/:email", async (req, res) => {
+    try {
+        const patientEmail = req.params.email;
+        const prescriptions = await prescription.find({ patientEmail }).sort({ date: -1 });
+        res.json(prescriptions);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 })
 
@@ -129,11 +273,73 @@ app.post("/admin_login", async (req, res) => {
     console.log(formData)
     let patients = await patient.find();
     let patientcount = await patient.countDocuments({})
+    let doctors = await doc.find();
+    let doctorcount = await doc.countDocuments({})
+    let receptionists = await recep.find();
+    let recepcount = await recep.countDocuments({})
     if ((adminData.email == formData.email) && (adminData.password == formData.password)) {
-        res.render("admin.ejs", { patients, patientcount });
+        res.render("admin.ejs", { patients, patientcount, doctors, doctorcount, receptionists, recepcount });
     } else {
         res.send("wrong credentials");
     }
+})
+
+app.get("/add_doctor", (req, res) => {
+    res.render("add_doctor.ejs");
+})
+
+app.post("/add_doctor", async (req, res) => {
+    let doctorData = req.body;
+    let newDoctor = new doc(doctorData);
+
+    await newDoctor.save()
+        .then(() => {
+            res.render("doctor_added_success.ejs");
+        })
+        .catch((err) => {
+            res.send(err.errorResponse.errmsg);
+        })
+})
+
+app.delete("/delete_doctor/:id", async (req, res) => {
+    let doctorId = req.params.id;
+
+    await doc.findByIdAndDelete(doctorId)
+        .then(() => {
+            res.send("Doctor deleted successfully!");
+        })
+        .catch((err) => {
+            res.send("Error deleting doctor: " + err.message);
+        })
+})
+
+app.get("/add_receptionist", (req, res) => {
+    res.render("add_receptionist.ejs");
+})
+
+app.post("/add_receptionist", async (req, res) => {
+    let recepData = req.body;
+    let newReceptionist = new recep(recepData);
+
+    await newReceptionist.save()
+        .then(() => {
+            res.render("receptionist_added_success.ejs");
+        })
+        .catch((err) => {
+            res.send(err.errorResponse.errmsg);
+        })
+})
+
+app.delete("/delete_receptionist/:id", async (req, res) => {
+    let recepId = req.params.id;
+
+    await recep.findByIdAndDelete(recepId)
+        .then(() => {
+            res.send("Receptionist deleted successfully!");
+        })
+        .catch((err) => {
+            res.send("Error deleting receptionist: " + err.message);
+        })
 })
 
 
