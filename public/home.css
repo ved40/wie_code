@@ -1,0 +1,121 @@
+body {
+    background: #f4f9ff;
+    font-family: "Poppins", sans-serif;
+    margin: 0.2rem;
+}
+
+
+.hero-section {
+    height: 50vh;
+    background: linear-gradient(135deg, #007BFF, #00C6FF);
+    padding: 50px 20px;
+}
+
+/*heading*/
+.title {
+    font-size: 2.6rem;
+    color: #004aad;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: #5a6a85;
+    max-width: 650px;
+    margin: auto;
+}
+
+/*login*/
+.login-btn {
+    background: #007bff;
+    border-radius: 40px;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    transform: scale(1.05);
+    background-color: #0056d2;
+}
+
+/*cards*/
+.feature-card {
+    border-radius: 18px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #e4e9f2;
+    transition: 0.35s ease;
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    border-color: #3b82f6;
+    box-shadow: 0 15px 32px rgba(0, 0, 0, 0.08);
+}
+
+/*icons*/
+.icon-circle {
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background: #eaf3ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-circle i {
+    font-size: 30px;
+    color: #0056d2;
+}
+
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #003f7f;
+}
+
+
+.card-text {
+    font-size: 0.9rem;
+    color: #607080;
+    margin-bottom: 20px;
+}
+
+/*btns inside cards*/
+.feature-card .btn {
+    border-radius: 30px;
+    transition: 0.3s;
+}
+
+.feature-card .btn:hover {
+    background: #0056d2;
+    color: white;
+}
+
+#mainNavbar {
+    background: #ffffff;
+}
+
+.logo-text {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2b2b2b;
+    letter-spacing: 1px;
+}
+
+.back-btn {
+    border-radius: 50px;
+    padding: 6px 12px;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    background-color: #eeeeee;
+}
+
+#mainNavbar i {
+    transition: 0.3s;
+}

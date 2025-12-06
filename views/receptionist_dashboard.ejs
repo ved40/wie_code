@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receptionist Dashboard - CLINIC-CONNECT</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="receptionist_dashboard.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="bi bi-hospital"></i> CLINIC-CONNECT
+        </div>
+
+        <a onclick="showSection('home')"><i class="bi bi-house-door"></i> Dashboard</a>
+        <a onclick="showSection('registerForm')"><i class="bi bi-person-add"></i> Register Patient</a>
+        <a onclick="showSection('appointments')"><i class="bi bi-card-list"></i> Appointments</a>
+
+        <a href="/" class="logout"><i class="bi bi-box-arrow-left"></i> Logout</a>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+        <!-- Home Screen -->
+        <div id="home">
+            <h1 class="fw-bold">Welcome Receptionist 👋</h1>
+            <p>Use the sidebar to manage patients and appointments.</p>
+        </div>
+
+        <!-- Register Patient Form Section -->
+        <div id="registerForm" class="d-none">
+            <h2 class="mb-3"><i class="bi bi-person-plus"></i> Register New Patient</h2>
+
+            <form class="p-4 shadow bg-white rounded" style="width: 600px;" method="POST" action="/register_patient">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter patient name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter patient email" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" placeholder="Enter phone number" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <select name="gender" class="form-select">
+                        <option value="Male" selected>Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control" placeholder="Enter address" rows="3"></textarea>
+                </div>
+
+                <button class="btn btn-success w-100">Register Patient</button>
+            </form>
+        </div>
+
+        <!-- Appointments Section -->
+        <div id="appointments" class="d-none">
+            <h2><i class="bi bi-card-checklist"></i> Manage Appointments</h2>
+            <form action="/create_appointment" method="POST">
+
+                <!-- Name -->
+                <div class="mb-3">
+                    <label class="form-label">Patient Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter patient's full name"
+                        required>
+                </div>
+
+                <!-- Phone -->
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" placeholder="Mobile number" required>
+                </div>
+
+                <!-- DOB -->
+                <div class="mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" name="dob" class="form-control" required>
+                </div>
+
+                <!-- Gender -->
+                <div class="mb-3">
+                    <label class="form-label">Gender</label>
+                    <select name="gender" class="form-select" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+
+
+                <!-- Appointment Date Time -->
+                <div class="mb-3">
+                    <label class="form-label">Appointment Date and Time</label>
+                    <input type="datetime-local" name="appointmentDateTime" class="form-control" required>
+                </div>
+
+                <button class="btn btn-primary w-100">Book Appointment</button>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll(".content > div").forEach(sec => sec.classList.add("d-none"));
+            document.getElementById(sectionId).classList.remove("d-none");
+        }
+    </script>
+
+</body>
+
+</html>

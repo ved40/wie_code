@@ -1,0 +1,47 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    background: #f8f9fa;
+}
+
+.sidebar {
+    width: 240px;
+    background: #12203a;
+    height: 100vh;
+    color: white;
+    padding: 20px 10px;
+    position: fixed;
+}
+
+.sidebar .logo {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: white;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.sidebar a:hover {
+    background: #1e2f54;
+}
+
+.logout {
+    position: absolute;
+    bottom: 20px;
+    width: 90%;
+}
+
+.content {
+    margin-left: 260px;
+    padding: 30px;
+    width: calc(100% - 260px);
+}
