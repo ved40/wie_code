@@ -119,11 +119,22 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Aakash Patil</td>
-                        <td>25</td>
-                        <td>2025-11-20</td>
-                        <td><button class="btn btn-outline-info btn-sm">View Record</button></td>
+                        <% for(patient of patients){ %>
+                    <tr>
+                        <td>
+                            <%= patient.name %>
+                        </td>
+                        <td>
+                            <%= patient.gender %>
+                        </td>
+                        <td>
+                            <%= new Date(patient.dob).toLocaleDateString("en-IN", { day: "2-digit" , month: "short" ,
+                                year: "numeric" }) %>
+                        </td>
+
                     </tr>
+                    <% }%>
+                        </tr>
                 </tbody>
             </table>
         </div>

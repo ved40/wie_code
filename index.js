@@ -7,6 +7,7 @@ const recep = require("./models/receptionist");
 const doc = require("./models/doctor")
 const patient = require("./models/patient_rgstr");
 const appointment = require("./models/appointment");
+const admin = require("./models/admin_login");
 
 
 app.use(methodOverride("_method"));
@@ -88,8 +89,9 @@ app.post("/doctor_login", async (req, res) => {
     let doc_data = await doc.find();
     let docData = doc_data[0];
     let formData = req.body;
+    let patients = await patient.find();
     if ((docData.email == formData.email) && (docData.password == formData.password)) {
-        res.render("doctor_dashboard.ejs", { appointments });
+        res.render("doctor_dashboard.ejs", { appointments, patients });
     } else {
         res.send("wrong credentials");
     }
@@ -103,25 +105,50 @@ app.post("/patient_login", async (req, res) => {
     const { email, phone } = req.body;
     const user = await patient.findOne({ email });
     console.log(user);
+    let appointments = await appointment.find();
 
     if (!user) return res.send("User not found");
 
     if (user.phone === phone) {
 
-        res.render("patient_dashboard.ejs", { user });
+        res.render("patient_dashboard.ejs", { user, appointments });
     } else {
         res.send("Wrong credentials")
     }
 });
 
-app.get("/admin", async (req, res) => {
+app.get("/admin_login", (req, res) => {
+    res.render("admin_login.ejs")
+})
+
+app.post("/admin_login", async (req, res) => {
+    let admin_data = await admin.find();
+    let adminData = admin_data[0];
+    console.log(adminData)
+    let formData = req.body;
+    console.log(formData)
     let patients = await patient.find();
     let patientcount = await patient.countDocuments({})
-    res.render("admin.ejs", { patients, patientcount });
+    if ((adminData.email == formData.email) && (adminData.password == formData.password)) {
+        res.render("admin.ejs", { patients, patientcount });
+    } else {
+        res.send("wrong credentials");
+    }
 })
 
 
 
+
+// app.get("/adminData", (req, res) => {
+//     let adminData = new admin({
+//         email: "renu@mail.com",
+//         password: "13022007"
+//     });
+
+//     adminData.save();
+//     console.log("saved");
+//     res.send("successful");
+// })
 
 // app.get("/recep_data", (req, res) => {
 //     let recepData = new recep({
